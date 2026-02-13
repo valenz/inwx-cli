@@ -60,7 +60,7 @@ METHODS = {
     "nameserver.createRecord": {
         "params": {
             "domain": {"type": str, "help": "Domain name"},
-            "roId": {"type": int, "help": "NS domain id"},
+            "roId": {"type": str, "help": "NS domain id"},
             "type": {"type": str, "help": "Record type", "required": True},
             "content": {"type": str, "help": "Record content", "required": True},
             "name": {"type": str, "help": "Record name"},
@@ -78,13 +78,13 @@ METHODS = {
     "nameserver.delete": {
         "params": {
             "domain": {"type": str, "help": "Domain name"},
-            "roId": {"type": int, "help": "NS domain id"},
+            "roId": {"type": str, "help": "NS domain id"},
             "testing": {"type": bool, "help": "Testing mode", "default": False},
         }
     },
     "nameserver.deleteRecord": {
         "params": {
-            "id": {"type": int, "help": "Record id", "required": True},
+            "id": {"type": str, "help": "Record id", "required": True},
             "testing": {"type": bool, "help": "Testing mode", "default": False},
         }
     },
@@ -113,7 +113,7 @@ METHODS = {
     "nameserver.info": {
         "params": {
             "domain": {"type": str, "help": "Domain name"},
-            "roId": {"type": int, "help": "NS domain id"},
+            "roId": {"type": str, "help": "NS domain id"},
             "recordId": {"type": int, "help": "Record id"},
             "type": {"type": str, "help": "Record type"},
             "name": {"type": str, "help": "Record name"},
@@ -133,7 +133,7 @@ METHODS = {
     "nameserver.update": {
         "params": {
             "domain": {"type": str, "help": "Domain name"},
-            "roId": {"type": int, "help": "NS domain id"},
+            "roId": {"type": str, "help": "NS domain id"},
             "type": {"type": str, "help": "Type of NS entry"},
             "masterIp": {"type": str, "help": "Master IP address"},
             "ns": {"type": str, "help": "Nameservers", "nargs": "+"},
@@ -149,7 +149,7 @@ METHODS = {
     },
     "nameserver.updateRecord": {
         "params": {
-            "id": {"type": int, "help": "Record id", "required": True},
+            "id": {"type": str, "help": "Record id", "required": True},
             "name": {"type": str, "help": "Record name"},
             "type": {"type": str, "help": "Record type"},
             "content": {"type": str, "help": "Record content"},

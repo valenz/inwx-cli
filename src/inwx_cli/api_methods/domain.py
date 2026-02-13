@@ -129,14 +129,14 @@ METHODS = {
     "domain.info": {
         "params": {
             "domain": {"type": str, "help": "Domain name"},
-            "roId": {"type": int, "help": "Repository Object ID"},
+            "roId": {"type": str, "help": "Repository Object ID"},
             "wide": {"type": int, "help": "More detailed output"},
         }
     },
     "domain.list": {
         "params": {
             "domain": {"type": str, "help": "Filter by domain name"},
-            "roId": {"type": int, "help": "Domain id"},
+            "roId": {"type": str, "help": "Domain id"},
             "status": {"type": str, "help": "Filter by status"},
             "registrant": {"type": int, "help": "Registrant id"},
             "admin": {"type": int, "help": "Admin id"},
