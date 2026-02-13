@@ -24,7 +24,7 @@ from .api_methods.domain import METHODS as DOMAIN_METHODS
 # Helpers
 # -----------------------------
 def print_json(data):
-    print(json.dumps(data, indent=2, ensure_ascii=False))
+    print(json.dumps(data, indent=2, ensure_ascii=False, default=str))
 
 
 def load_config():
