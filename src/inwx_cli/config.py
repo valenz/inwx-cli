@@ -5,6 +5,7 @@ import getpass
 import tomllib
 
 from pathlib import Path
+from .secrets import SecretStore
 
 
 CONFIG_DIR = Path.home() / ".config" / "inwx"
@@ -65,11 +66,13 @@ def config_init(args):
     password = getpass.getpass("Password: ")
     secret = getpass.getpass("Shared Secret (optional): ")
 
+    SecretStore.set(account, password)
+
     config = {
         "default_account": account,
         account: {
             "username": username,
-            "password": password,
+            "password_ref": account,
         }
     }
 
@@ -97,9 +100,11 @@ def config_add(args):
     password = getpass.getpass("Password: ")
     secret = getpass.getpass("Shared Secret (optional): ")
 
+    SecretStore.set(account, password)
+
     config[account] = {
         "username": username,
-        "password": password,
+        "password_ref": account,
     }
 
     if secret:
@@ -129,6 +134,7 @@ def config_remove(args):
         print("Aborted.")
         return
 
+    SecretStore.delete(account)
     del config[account]
 
     # Wenn Default entfernt wurde → löschen

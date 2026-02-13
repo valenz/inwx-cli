@@ -1,7 +1,7 @@
 # inwx_cli/api_session.py
 
-import time
 from INWX.Domrobot import ApiClient
+from .secrets import SecretStore
 
 
 class INWXSession:
@@ -9,16 +9,18 @@ class INWXSession:
     INWX login session logic
     """
 
-    def __init__(self, api_url, username, password, shared_secret=None):
+    def __init__(self, api_url, account, username, shared_secret=None):
         self.api = ApiClient(api_url=api_url, debug_mode=False)
+        self.account = account
         self.username = username
-        self.password = password
         self.shared_secret = shared_secret
 
     def __enter__(self):
+        password = SecretStore.get(self.account)
+
         result = self.api.login(
             self.username,
-            self.password,
+            password,
             self.shared_secret
         )
 
