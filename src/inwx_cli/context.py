@@ -9,20 +9,17 @@ class CLIContext:
     Holds config, account and API session.
     """
 
-    def __init__(self, config, account, username, password, secret):
+    def __init__(self, config, account, username):
         self.config = config
         self.account = account
         self.username = username
-        self.password = password
-        self.secret = secret
         self.session = None
 
     def __enter__(self):
         self.session = INWXSession(
             api_url="https://api.domrobot.com",
+            account=self.account,
             username=self.username,
-            password=self.password,
-            shared_secret=self.secret,
         )
         return self.session.__enter__()
 

@@ -1,22 +1,38 @@
-import keyring
+# inwx_cli/secrets.py
 
-SERVICE_NAME = "inwx-cli"
+import keyring
 
 
 class SecretStore:
-    @staticmethod
-    def set(account: str, password: str) -> None:
-        keyring.set_password(SERVICE_NAME, account, password)
+    SERVICE = "inwx-cli"
 
-    @staticmethod
-    def get(account: str) -> str:
-        password = keyring.get_password(SERVICE_NAME, account)
-        if not password:
-            raise RuntimeError(
-                f"No password found in keyring for account '{account}'"
-            )
-        return password
+    @classmethod
+    def set_password(cls, account: str, password: str):
+        keyring.set_password(cls.SERVICE, f"{account}:password", password)
 
-    @staticmethod
-    def delete(account: str) -> None:
-        keyring.delete_password(SERVICE_NAME, account)
+    @classmethod
+    def get_password(cls, account: str) -> str | None:
+        return keyring.get_password(cls.SERVICE, f"{account}:password")
+
+    @classmethod
+    def del_password(cls, account: str) -> None:
+        try:
+            keyring.delete_password(cls.SERVICE, f"{account}:password")
+        except keyring.errors.PasswordDeleteError:
+            pass  # secret did not exist → fine
+
+    @classmethod
+    def set_shared_secret(cls, account: str, secret: str):
+        keyring.set_password(cls.SERVICE, f"{account}:shared_secret", secret)
+
+    @classmethod
+    def get_shared_secret(cls, account: str) -> str | None:
+        return keyring.get_password(cls.SERVICE, f"{account}:shared_secret")
+
+    @classmethod
+    def del_shared_secret(cls, account: str) -> None:
+        try:
+            keyring.delete_password(cls.SERVICE, f"{account}:shared_secret")
+        except keyring.errors.PasswordDeleteError:
+            pass
+

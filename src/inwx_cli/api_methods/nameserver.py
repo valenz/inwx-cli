@@ -35,8 +35,8 @@ METHODS = {
     },
     "nameserver.clone": {
         "params": {
-            "sourceDomain": {"type": str, "help": "Source domain", "required": True},
-            "targetDomain": {"type": str, "help": "Target domain", "required": True},
+            "sourceDomain": {"type": str, "dest": "sourceDomain", "help": "Source domain", "required": True},
+            "targetDomain": {"type": str, "dest": "targetDomain", "help": "Target domain", "required": True},
         }
     },
     "nameserver.create": {
@@ -44,48 +44,50 @@ METHODS = {
             "domain": {"type": str, "help": "Domain name", "required": True},
             "type": {"type": str, "help": "Type of nameserver entry", "required": True},
             "ns": {"type": str, "help": "Nameserver list", "nargs": "+"},
-            "masterIp": {"type": str, "help": "Master IP address"},
+            "masterIp": {"type": str, "dest": "masterIp", "help": "Master IP address"},
             "web": {"type": str, "help": "Web NS entry"},
             "mail": {"type": str, "help": "Mail NS entry"},
-            "soaEmail": {"type": str, "help": "SOA email"},
-            "urlRedirectType": {"type": str, "help": "URL redirect type"},
-            "urlRedirectTitle": {"type": str, "help": "URL redirect title"},
-            "urlRedirectDescription": {"type": str, "help": "URL redirect description"},
-            "urlRedirectFavIcon": {"type": str, "help": "URL redirect favicon"},
-            "urlRedirectKeywords": {"type": str, "help": "URL redirect keywords"},
-            "testing": {"type": bool, "help": "Testing mode", "default": False},
-            "ignoreExisting": {"type": bool, "help": "Ignore existing", "default": False},
+            "soaEmail": {"type": str, "dest": "soaEmail", "help": "SOA email"},
+            "urlRedirectType": {"type": str, "dest": "urlRedirectType", "help": "URL redirect type"},
+            "urlRedirectTitle": {"type": str, "dest": "urlRedirectTitle", "help": "URL redirect title"},
+            "urlRedirectDescription": {"type": str, "dest": "urlRedirectDescription",
+                                       "help": "URL redirect description"},
+            "urlRedirectFavIcon": {"type": str, "dest": "urlRedirectFavIcon", "help": "URL redirect favicon"},
+            "urlRedirectKeywords": {"type": str, "dest": "urlRedirectKeywords","help": "URL redirect keywords"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
+            "ignoreExisting": {"action": "store_true", "dest": "ignoreExisting", "help": "Ignore existing"},
         }
     },
     "nameserver.createRecord": {
         "params": {
             "domain": {"type": str, "help": "Domain name"},
-            "roId": {"type": str, "help": "NS domain id"},
+            "roId": {"type": str, "dest": "roId", "help": "NS domain id"},
             "type": {"type": str, "help": "Record type", "required": True},
             "content": {"type": str, "help": "Record content", "required": True},
             "name": {"type": str, "help": "Record name"},
             "ttl": {"type": int, "help": "TTL"},
             "prio": {"type": int, "help": "Priority"},
-            "urlRedirectType": {"type": str, "help": "URL redirect type"},
-            "urlRedirectTitle": {"type": str, "help": "URL redirect title"},
-            "urlRedirectDescription": {"type": str, "help": "URL redirect description"},
-            "urlRedirectFavIcon": {"type": str, "help": "URL redirect favicon"},
-            "urlRedirectKeywords": {"type": str, "help": "URL redirect keywords"},
-            "urlAppend": {"type": bool, "help": "Append path", "default": False},
-            "testing": {"type": bool, "help": "Testing mode", "default": False},
+            "urlRedirectType": {"type": str, "dest": "urlRedirectType", "help": "URL redirect type"},
+            "urlRedirectTitle": {"type": str, "dest": "urlRedirectTitle", "help": "URL redirect title"},
+            "urlRedirectDescription": {"type": str, "dest": "urlRedirectDescription",
+                                       "help": "URL redirect description"},
+            "urlRedirectFavIcon": {"type": str, "dest": "urlRedirectFavIcon", "help": "URL redirect favicon"},
+            "urlRedirectKeywords": {"type": str, "dest": "urlRedirectKeywords", "help": "URL redirect keywords"},
+            "urlAppend": {"action": "store_true", "dest": "urlAppend", "help": "Append path"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "nameserver.delete": {
         "params": {
             "domain": {"type": str, "help": "Domain name"},
-            "roId": {"type": str, "help": "NS domain id"},
-            "testing": {"type": bool, "help": "Testing mode", "default": False},
+            "roId": {"type": str, "dest": "roId", "help": "NS domain id"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "nameserver.deleteRecord": {
         "params": {
             "id": {"type": str, "help": "Record id", "required": True},
-            "testing": {"type": bool, "help": "Testing mode", "default": False},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "nameserver.export": {
@@ -113,8 +115,8 @@ METHODS = {
     "nameserver.info": {
         "params": {
             "domain": {"type": str, "help": "Domain name"},
-            "roId": {"type": str, "help": "NS domain id"},
-            "recordId": {"type": int, "help": "Record id"},
+            "roId": {"type": str, "dest": "roId", "help": "NS domain id"},
+            "recordId": {"type": int, "dest": "recordId", "help": "Record id"},
             "type": {"type": str, "help": "Record type"},
             "name": {"type": str, "help": "Record name"},
             "content": {"type": str, "help": "Record content"},
@@ -133,18 +135,19 @@ METHODS = {
     "nameserver.update": {
         "params": {
             "domain": {"type": str, "help": "Domain name"},
-            "roId": {"type": str, "help": "NS domain id"},
+            "roId": {"type": str, "dest": "roId", "help": "NS domain id"},
             "type": {"type": str, "help": "Type of NS entry"},
-            "masterIp": {"type": str, "help": "Master IP address"},
+            "masterIp": {"type": str, "dest": "masterIp", "help": "Master IP address"},
             "ns": {"type": str, "help": "Nameservers", "nargs": "+"},
             "web": {"type": str, "help": "Web NS entry"},
             "mail": {"type": str, "help": "Mail NS entry"},
-            "urlRedirectType": {"type": str, "help": "URL redirect type"},
-            "urlRedirectTitle": {"type": str, "help": "URL redirect title"},
-            "urlRedirectDescription": {"type": str, "help": "URL redirect description"},
-            "urlRedirectFavIcon": {"type": str, "help": "URL redirect favicon"},
-            "urlRedirectKeywords": {"type": str, "help": "URL redirect keywords"},
-            "testing": {"type": bool, "help": "Testing mode", "default": False},
+            "urlRedirectType": {"type": str, "dest": "urlRedirectType", "help": "URL redirect type"},
+            "urlRedirectTitle": {"type": str, "dest": "urlRedirectTitle", "help": "URL redirect title"},
+            "urlRedirectDescription": {"type": str, "dest": "urlRedirectDescription",
+                                       "help": "URL redirect description"},
+            "urlRedirectFavIcon": {"type": str, "dest": "urlRedirectFavIcon", "help": "URL redirect favicon"},
+            "urlRedirectKeywords": {"type": str, "dest": "urlRedirectKeywords", "help": "URL redirect keywords"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "nameserver.updateRecord": {
@@ -155,13 +158,14 @@ METHODS = {
             "content": {"type": str, "help": "Record content"},
             "prio": {"type": int, "help": "Priority"},
             "ttl": {"type": int, "help": "TTL"},
-            "urlRedirectType": {"type": str, "help": "URL redirect type"},
-            "urlRedirectTitle": {"type": str, "help": "URL redirect title"},
-            "urlRedirectDescription": {"type": str, "help": "URL redirect description"},
-            "urlRedirectFavIcon": {"type": str, "help": "URL redirect favicon"},
-            "urlRedirectKeywords": {"type": str, "help": "URL redirect keywords"},
-            "urlAppend": {"type": bool, "help": "Append path", "default": False},
-            "testing": {"type": bool, "help": "Testing mode", "default": False},
+            "urlRedirectType": {"type": str, "dest": "urlRedirectType", "help": "URL redirect type"},
+            "urlRedirectTitle": {"type": str, "dest": "urlRedirectTitle", "help": "URL redirect title"},
+            "urlRedirectDescription": {"type": str, "dest": "urlRedirectDescription",
+                                       "help": "URL redirect description"},
+            "urlRedirectFavIcon": {"type": str, "dest": "urlRedirectFavIcon", "help": "URL redirect favicon"},
+            "urlRedirectKeywords": {"type": str, "dest": "urlRedirectKeywords", "help": "URL redirect keywords"},
+            "urlAppend": {"action": "store_true", "dest": "urlAppend", "help": "Append path"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
 }

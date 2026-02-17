@@ -1,5 +1,8 @@
 # inwx_cli/api_methods/domain.py
 
+import argparse
+
+
 """
 Domain API Methods for INWX
 Based on official DomRobot API documentation:
@@ -36,6 +39,17 @@ Contains:
 """
 
 
+def parse_bool(value: str) -> bool:
+    value = value.lower()
+    if value in ("true", "1", "yes", "y", "t", "on"):
+        return True
+    if value in ("false", "0", "no", "n", "f", "off"):
+        return False
+    raise argparse.ArgumentTypeError(
+        f"invalid boolean value: '{value}' (use true/false)"
+    )
+
+
 # -----------------------------
 # API Method Definitions
 # -----------------------------
@@ -58,22 +72,22 @@ METHODS = {
             "tech": {"type": int, "help": "Tech contact handle id"},
             "billing": {"type": int, "help": "Billing contact handle id"},
             "ns": {"type": str, "help": "List of nameservers", "nargs": "+"},
-            "transferLock": {"type": bool, "help": "Lock domain"},
-            "renewalMode": {"type": str, "help": "Domain renewal mode"},
-            "whoisProvider": {"type": str, "help": "Whois provider"},
-            "whoisUrl": {"type": str, "help": "Whois URL"},
-            "scDate": {"type": str, "help": "Scheduled execution date"},
-            "extData": {"type": str, "help": "Extra domain data"},
-            "asynchron": {"type": bool, "help": "Asynchronous execution"},
+            "transferLock": {"action": "store_true", "dest": "transferLock", "help": "Lock domain"},
+            "renewalMode": {"type": str, "dest": "renewalMode", "help": "Domain renewal mode"},
+            "whoisProvider": {"type": str, "dest": "whoisProvider", "help": "Whois provider"},
+            "whoisUrl": {"type": str, "dest": "whoisUrl", "help": "Whois URL"},
+            "scDate": {"type": str, "dest": "scDate", "help": "Scheduled execution date"},
+            "extData": {"type": str, "dest": "extData", "help": "Extra domain data"},
+            "asynchron": {"action": "store_true", "help": "Asynchronous execution"},
             "voucher": {"type": str, "help": "Voucher code"},
-            "testing": {"type": bool, "help": "Testing mode"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "domain.delete": {
         "params": {
             "domain": {"type": str, "help": "Domain name", "required": True},
-            "scDate": {"type": str, "help": "Scheduled execution date"},
-            "testing": {"type": bool, "help": "Testing mode"},
+            "scDate": {"type": str, "dest": "scDate", "help": "Scheduled execution date"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "domain.getalldomainprices": {
@@ -99,8 +113,8 @@ METHODS = {
     "domain.getPrices": {
         "params": {
             "tld": {"type": str, "help": "Top level domains", "nargs": "+"},
-            "vat": {"type": bool, "help": "Include VAT"},
-            "vatCC": {"type": str, "help": "Country code for VAT"},
+            "vat": {"action": "store_true", "help": "Include VAT"},
+            "vatCC": {"type": str, "dest": "vatCC", "help": "Country code for VAT"},
             "voucher": {"type": str, "help": "Voucher code"},
             "page": {"type": int, "help": "Page number"},
             "pagelimit": {"type": int, "help": "Max results"},
@@ -109,10 +123,10 @@ METHODS = {
     "domain.getPromos": {
         "params": {
             "tlds": {"type": str, "help": "Specific TLDs to check promos", "nargs": "+"},
-            "promoType": {"type": str, "help": "Promo type (e.g. REG|RENEWAL)"},
+            "promoType": {"type": str, "dest": "promoType", "help": "Promo type (e.g. REG|RENEWAL)"},
             "period": {"type": int, "help": "Promotion period"},
-            "periodUnit": {"type": str, "help": "Period unit (Y/M etc.)"},
-            "executionDate": {"type": str, "help": "Promo execution date"},
+            "periodUnit": {"type": str, "dest": "periodUnit", "help": "Period unit (Y/M etc.)"},
+            "executionDate": {"type": str, "dest": "executionDate", "help": "Promo execution date"},
             "voucher": {"type": str, "help": "Voucher code"},
         }
     },
@@ -129,28 +143,30 @@ METHODS = {
     "domain.info": {
         "params": {
             "domain": {"type": str, "help": "Domain name"},
-            "roId": {"type": str, "help": "Repository Object ID"},
+            "roId": {"type": str, "dest": "roId", "help": "Repository Object ID"},
             "wide": {"type": int, "help": "More detailed output"},
         }
     },
     "domain.list": {
         "params": {
             "domain": {"type": str, "help": "Filter by domain name"},
-            "roId": {"type": str, "help": "Domain id"},
+            "roId": {"type": str, "dest": "roId", "help": "Filter by domain id"},
             "status": {"type": str, "help": "Filter by status"},
-            "registrant": {"type": int, "help": "Registrant id"},
-            "admin": {"type": int, "help": "Admin id"},
-            "tech": {"type": int, "help": "Tech id"},
-            "billing": {"type": int, "help": "Billing id"},
-            "renewalMode": {"type": str, "help": "Filter by renewal mode"},
-            "transferLock": {"type": bool, "help": "Filter by transfer lock status"},
-            "noDelegation": {"type": bool, "help": "Filter by delegation status"},
+            "registrant": {"type": int, "help": "Filter by registrant id"},
+            "admin": {"type": int, "help": "Filter by admin id"},
+            "tech": {"type": int, "help": "Filter by tech id"},
+            "billing": {"type": int, "help": "Filter by billing id"},
+            "renewalMode": {"type": str, "dest": "renewalMode", "help": "Filter by renewal mode"},
+            "transferLock": {"action": argparse.BooleanOptionalAction, "dest": "transferLock",
+                             "help": "Filter by transfer lock status"},
+            "noDelegation": {"type": parse_bool, "dest": "noDelegation", "metavar": "{true, false}",
+                             "help": "Filter by delegation status"},
             "tag": {"type": int, "help": "Filter by tag ids"},
             "wide": {"type": int, "help": "More detailed output"},
             "order": {"type": str, "help": "Sort order"},
             "page": {"type": int, "help": "Page number"},
             "pagelimit": {"type": int, "help": "Max results"},
-            "withPrivacy": {"type": int, "help": "Filter by privacy flag"},
+            "withPrivacy": {"type": int, "dest": "withPrivacy", "help": "Filter by privacy flag"},
         }
     },
     "domain.log": {
@@ -158,10 +174,10 @@ METHODS = {
             "domain": {"type": str, "help": "Filter result by domain name"},
             "status": {"type": str, "help": "Filter by status"},
             "invoice": {"type": str, "help": "Filter by invoice id"},
-            "dateFrom": {"type": str, "help": "Filter by start date"},
-            "dateTo": {"type": str, "help": "Filter by end date"},
-            "priceMin": {"type": float, "help": "Minimum price"},
-            "priceMax": {"type": float, "help": "Maximum price"},
+            "dateFrom": {"type": str, "dest": "dateFrom", "help": "Filter by start date"},
+            "dateTo": {"type": str, "dest": "dateTo", "help": "Filter by end date"},
+            "priceMin": {"type": float, "dest": "priceMin", "help": "Minimum price"},
+            "priceMax": {"type": float, "dest": "priceMax", "help": "Maximum price"},
             "order": {"type": str, "help": "Ordering of results"},
             "page": {"type": int, "help": "Page number"},
             "pagelimit": {"type": int, "help": "Max results"},
@@ -174,14 +190,14 @@ METHODS = {
         "params": {
             "domain": {"type": str, "help": "Domain name", "required": True},
             "target": {"type": str, "help": "Target registrar"},
-            "scDate": {"type": str, "help": "Scheduled date"},
-            "testing": {"type": bool, "help": "Testing mode"},
+            "scDate": {"type": str, "dest": "scDate", "help": "Scheduled date"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "domain.removeClientHold": {
         "params": {
             "domain": {"type": str, "help": "Domain name", "required": True},
-            "testing": {"type": bool, "help": "Testing mode"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "domain.renew": {
@@ -189,21 +205,21 @@ METHODS = {
             "domain": {"type": str, "help": "Domain name", "required": True},
             "period": {"type": str, "help": "Renewal period", "required": True},
             "expiration": {"type": str, "help": "Current expiration date", "required": True},
-            "asynchron": {"type": bool, "help": "Async execution"},
-            "testing": {"type": bool, "help": "Testing mode"},
+            "asynchron": {"action": "store_true", "help": "Async execution"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "domain.restore": {
         "params": {
             "domain": {"type": str, "help": "Domain name", "required": True},
-            "renewalMode": {"type": str, "help": "Domain renewal mode"},
-            "testing": {"type": bool, "help": "Testing mode"},
+            "renewalMode": {"type": str, "dest": "renewalMode", "help": "Domain renewal mode"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "domain.setClientHold": {
         "params": {
             "domain": {"type": str, "help": "Domain name", "required": True},
-            "testing": {"type": bool, "help": "Testing mode"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "domain.stats": {
@@ -217,13 +233,13 @@ METHODS = {
             "tech": {"type": int, "help": "New tech id"},
             "billing": {"type": int, "help": "New billing id"},
             "ns": {"type": str, "help": "Nameservers", "nargs": "+"},
-            "authCode": {"type": str, "help": "Authorization code"},
-            "whoisProvider": {"type": str, "help": "Whois provider"},
-            "whoisUrl": {"type": str, "help": "Whois url"},
-            "scDate": {"type": str, "help": "Scheduled date"},
-            "extData": {"type": str, "help": "Extra domain data"},
-            "asynchron": {"type": bool, "help": "Async mode"},
-            "testing": {"type": bool, "help": "Testing mode"},
+            "authCode": {"type": str, "dest": "authCode", "help": "Authorization code"},
+            "whoisProvider": {"type": str, "dest": "whoisProvider", "help": "Whois provider"},
+            "whoisUrl": {"type": str, "dest": "whoisUrl", "help": "Whois url"},
+            "scDate": {"type": str, "dest": "scDate", "help": "Scheduled date"},
+            "extData": {"type": str, "dest": "extData", "help": "Extra domain data"},
+            "asynchron": {"action": "store_true", "help": "Async mode"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "domain.transfer": {
@@ -234,18 +250,19 @@ METHODS = {
             "tech": {"type": int, "help": "Tech contact"},
             "billing": {"type": int, "help": "Billing contact"},
             "ns": {"type": str, "help": "Nameservers", "nargs": "+"},
-            "nsTakeover": {"type": bool, "help": "Keep existing nameservers"},
-            "contactTakeover": {"type": bool, "help": "Transfer contact data"},
-            "transferLock": {"type": bool, "help": "Domain lock"},
-            "authCode": {"type": str, "help": "Authorization code"},
-            "renewalMode": {"type": str, "help": "Renewal mode"},
-            "whoisProvider": {"type": str, "help": "Whois provider"},
-            "whoisUrl": {"type": str, "help": "Whois url"},
-            "extData": {"type": str, "help": "Extra domain data"},
-            "scDate": {"type": str, "help": "Scheduled date"},
-            "asynchron": {"type": bool, "help": "Async mode"},
+            "nsTakeover": {"action": "store_true", "dest": "nsTakeover", "help": "Keep existing nameservers"},
+            "contactTakeover": {"action": "store_true", "dest": "contactTakeover",
+                                "help": "Transfer contact data"},
+            "transferLock": {"action": "store_true", "dest": "transferLock", "help": "Domain lock"},
+            "authCode": {"type": str, "dest": "authCode", "help": "Authorization code"},
+            "renewalMode": {"type": str, "dest": "renewalMode", "help": "Renewal mode"},
+            "whoisProvider": {"type": str, "dest": "whoisProvider", "help": "Whois provider"},
+            "whoisUrl": {"type": str, "dest": "whoisUrl", "help": "Whois url"},
+            "extData": {"type": str, "dest": "extData", "help": "Extra domain data"},
+            "scDate": {"type": str, "dest": "scDate", "help": "Scheduled date"},
+            "asynchron": {"action": "store_true", "help": "Async mode"},
             "voucher": {"type": str, "help": "Voucher code"},
-            "testing": {"type": bool, "help": "Testing mode"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "domain.transfercancel": {
@@ -257,7 +274,7 @@ METHODS = {
         "params": {
             "domain": {"type": str, "help": "Domain name", "required": True},
             "answer": {"type": str, "help": "Acknowledge or deny transfer", "required": True},
-            "testing": {"type": bool, "help": "Testing mode"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "domain.update": {
@@ -268,17 +285,17 @@ METHODS = {
             "tech": {"type": int, "help": "Tech handle id"},
             "billing": {"type": int, "help": "Billing handle id"},
             "ns": {"type": str, "help": "Nameservers", "nargs": "+"},
-            "transferLock": {"type": bool, "help": "Domain lock"},
+            "transferLock": {"action": "store_true", "dest": "transferLock", "help": "Domain lock"},
             "period": {"type": str, "help": "Registration/renewal period"},
-            "authCode": {"type": str, "help": "Authorization code"},
-            "scDate": {"type": str, "help": "Scheduled date"},
-            "renewalMode": {"type": str, "help": "Renewal mode"},
-            "transferMode": {"type": str, "help": "Transfer mode"},
-            "whoisProvider": {"type": str, "help": "Whois provider"},
-            "whoisUrl": {"type": str, "help": "Whois url"},
-            "extData": {"type": str, "help": "Extra domain data"},
-            "asynchron": {"type": bool, "help": "Async mode"},
-            "testing": {"type": bool, "help": "Testing mode"},
+            "authCode": {"type": str, "dest": "authCode", "help": "Authorization code"},
+            "scDate": {"type": str, "dest": "scDate", "help": "Scheduled date"},
+            "renewalMode": {"type": str, "dest": "renewalMode", "help": "Renewal mode"},
+            "transferMode": {"type": str, "dest": "transferMode", "help": "Transfer mode"},
+            "whoisProvider": {"type": str, "dest": "whoisProvider", "help": "Whois provider"},
+            "whoisUrl": {"type": str, "dest": "whoisUrl", "help": "Whois url"},
+            "extData": {"type": str, "dest": "extData", "help": "Extra domain data"},
+            "asynchron": {"action": "store_true", "help": "Async mode"},
+            "testing": {"action": "store_true", "help": "Testing mode"},
         }
     },
     "domain.whois": {

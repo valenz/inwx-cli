@@ -1,20 +1,18 @@
 # inwx_cli/cli.py
 
-import argparse
-import json
 import sys
-import os
-import stat
-import tomllib
-
-from pathlib import Path
+import json
+import argparse
 from .config import (
     config_init,
     config_add,
-    config_list,
+    config_remove,
     config_set_default,
-    config_remove,)
+    config_list,
+    config_doctor,)
+from .config import load_config
 from .context import CLIContext
+from .exceptions import INWXAPIError
 from .api_core import register_methods
 from .api_methods.nameserver import METHODS as NAMESERVER_METHODS
 from .api_methods.domain import METHODS as DOMAIN_METHODS
@@ -23,54 +21,27 @@ from .api_methods.domain import METHODS as DOMAIN_METHODS
 # -----------------------------
 # Helpers
 # -----------------------------
-def print_json(data):
-    print(json.dumps(data, indent=2, ensure_ascii=False, default=str))
+def get_json(data):
+    return json.dumps(data, indent=2, ensure_ascii=False, default=str)
 
 
-def load_config():
-    config_path = Path.home() / ".config" / "inwx" / "config.toml"
-
-    if not config_path.exists():
-        return {}
-
-    mode = config_path.stat().st_mode
-    if mode & (stat.S_IRWXG | stat.S_IRWXO):
-        print("WARNING: Config file permissions too open! Should be 600.", file=sys.stderr)
-
-    with open(config_path, "rb") as f:
-        return tomllib.load(f)
-
-
-def get_credentials(config, account):
-    env_user = os.environ.get(f"INWX_USER_{account.upper()}")
-    env_pass = os.environ.get(f"INWX_PASS_{account.upper()}")
-    env_secret = os.environ.get(f"INWX_SECRET_{account.upper()}")
-
-    if env_user and env_pass:
-        return env_user, env_pass, env_secret
-
+def get_username(config, account):
     if account in config:
-        return (
-            config[account].get("username"),
-            config[account].get("password"),
-            config[account].get("shared_secret"),
-        )
-
-    return None, None, None
+        return config[account].get("username")
+    return None
 
 
-def resolve_account(args, config):
-    if args.account:
-        return args.account
-
-    return config.get("default_account")
+def exit_with(rc: int | None):
+    if rc is None:
+        sys.exit(0)
+    sys.exit(rc)
 
 
 # -----------------------------
 # CLI
 # -----------------------------
 def main():
-    config = load_config()
+    config = load_config(check_permissions=True)
 
     parser = argparse.ArgumentParser(description="INWX API CLI Tool")
 
@@ -95,7 +66,7 @@ def main():
     config_add_parser.set_defaults(func=config_add)
 
     # remove
-    config_remove_parser = config_subparsers.add_parser("remove", help="Remove account")
+    config_remove_parser = config_subparsers.add_parser("del", help="Remove account")
     config_remove_parser.add_argument("account", help="Account name")
     config_remove_parser.set_defaults(func=config_remove)
 
@@ -108,6 +79,10 @@ def main():
     config_list_parser = config_subparsers.add_parser("list", help="List configured accounts")
     config_list_parser.set_defaults(func=config_list)
 
+    # doctor
+    config_doctor_parser = config_subparsers.add_parser("doctor", help="Check config and keyring consistency")
+    config_doctor_parser.set_defaults(func=config_doctor)
+
     register_methods(subparsers, NAMESERVER_METHODS)
     register_methods(subparsers, DOMAIN_METHODS)
 
@@ -115,30 +90,38 @@ def main():
 
     # Special case: config commands do not need API login
     if args.command == "config":
-        args.func(args)
-        return
+        rc = args.func(args)
+        exit_with(rc)
 
     account = args.account or config.get("default_account")
 
     if not account:
         print("No account specified and no default_account configured.", file=sys.stderr)
-        sys.exit(1)
+        exit_with(1)
 
-    user, pwd, secret = get_credentials(config, account)
+    username = get_username(config, account)
 
-    if not user or not pwd:
+    if not username:
         print(f"Missing credentials for account '{account}'.", file=sys.stderr)
-        sys.exit(1)
+        exit_with(1)
 
-    ctx = CLIContext(config, account, user, pwd, secret)
+    ctx = CLIContext(config, account, username)
 
     try:
         with ctx as api:
-            result = args.func(api, args.api_method, args, ctx)
-            print_json(result)
+            result = args.func(api, args.api_method, args)
+            print(get_json(result))
+            rc = 0
+
+    except INWXAPIError as e:
+        print(get_json(e.result), file=sys.stderr)
+        rc = 2
+
     except Exception as e:
         print(e, file=sys.stderr)
-        sys.exit(1)
+        rc = 3
+
+    exit_with(rc)
 
 
 if __name__ == "__main__":
